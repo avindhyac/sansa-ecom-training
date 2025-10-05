@@ -34,6 +34,9 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
 
     localStorage.setItem('cart', JSON.stringify(cart))
 
+    // Dispatch custom event to update cart counter
+    window.dispatchEvent(new Event('cartUpdated'))
+
     // Show success feedback
     setTimeout(() => {
       setIsAdding(false)

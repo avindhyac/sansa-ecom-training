@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import AuthButton from './AuthButton'
 import Link from 'next/link'
-import { ShoppingCart, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import SearchBox from './SearchBox'
+import CartCounter from './CartCounter'
 
 export default async function Header() {
   const supabase = await createClient()
@@ -33,19 +34,7 @@ export default async function Header() {
           {/* Right Section */}
           <div className="flex items-center gap-4">
             {/* Cart */}
-            <Link
-              href="/cart"
-              className="relative flex items-center gap-2 text-foreground hover:text-jade transition-colors group px-3 py-2 rounded-lg hover:bg-background-soft"
-            >
-              <div className="relative">
-                <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                {/* Cart Badge - You can make this dynamic */}
-                <span className="absolute -top-2 -right-2 w-5 h-5 bg-jade text-white text-xs font-bold rounded-full flex items-center justify-center">
-                  0
-                </span>
-              </div>
-              <span className="hidden sm:block text-sm font-medium">Cart</span>
-            </Link>
+            <CartCounter />
 
             {/* Auth Button */}
             <AuthButton user={user} />

@@ -20,6 +20,9 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
     setIsAdding(true)
     onAddToCart(product)
 
+    // Dispatch custom event to update cart counter
+    window.dispatchEvent(new Event('cartUpdated'))
+
     // Reset after animation
     setTimeout(() => setIsAdding(false), 1000)
   }
