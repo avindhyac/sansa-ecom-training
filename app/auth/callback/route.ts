@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { resend } from '@/lib/resend'
-import { render } from '@react-email/components'
+import { render } from '@react-email/render'
 import WelcomeEmail from '@/emails/WelcomeEmail'
 
 export async function GET(request: Request) {

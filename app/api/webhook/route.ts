@@ -3,7 +3,7 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@/lib/supabase/server'
 import { resend } from '@/lib/resend'
 import Stripe from 'stripe'
-import { render } from '@react-email/components'
+import { render } from '@react-email/render'
 import OrderConfirmationEmail from '@/emails/OrderConfirmationEmail'
 
 export async function POST(request: Request) {
