@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { resend } from '@/lib/resend'
 import { render } from '@react-email/render'
@@ -23,19 +24,31 @@ export async function GET(request: Request) {
           .from('customers')
           .select('*')
           .eq('id', user.id)
-          .single()
+          .maybeSingle()
 
         const isNewCustomer = !existingCustomer
 
         if (isNewCustomer) {
-          // Create customer record using upsert to handle race conditions
-          await supabase.from('customers').upsert({
+          // Create customer record using admin client to bypass RLS
+          const supabaseAdmin = createAdminClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            { auth: { autoRefreshToken: false, persistSession: false } }
+          )
+
+          const { error: customerError } = await supabaseAdmin.from('customers').upsert({
             id: user.id,
             email: user.email!,
             full_name: user.user_metadata.full_name || user.user_metadata.name || null,
           }, {
             onConflict: 'id'
           })
+
+          if (customerError) {
+            console.error('Error creating customer record:', customerError)
+          } else {
+            console.log('Customer record created for:', user.email)
+          }
 
           // Send welcome email to new user
           try {
@@ -46,17 +59,19 @@ export async function GET(request: Request) {
               })
             )
 
-            await resend.emails.send({
+            const emailResult = await resend.emails.send({
               from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
               to: user.email!,
               subject: 'Welcome to Ecommerce Store! 🎉',
               html: emailHtml,
             })
 
-            console.log('Welcome email sent to:', user.email)
+            console.log('Welcome email sent to:', user.email, 'Result:', emailResult)
           } catch (emailError) {
             console.error('Error sending welcome email:', emailError)
           }
+        } else {
+          console.log('Returning user:', user.email)
         }
       }
 
