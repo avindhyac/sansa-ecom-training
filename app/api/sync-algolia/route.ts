@@ -38,24 +38,29 @@ export async function POST(request: Request) {
 
     // Sync to Algolia
     const algoliaClient = getAdminClient()
-    const index = algoliaClient.initIndex(ALGOLIA_INDEX_NAME)
 
-    await index.saveObjects(algoliaProducts)
+    await algoliaClient.saveObjects({
+      indexName: ALGOLIA_INDEX_NAME,
+      objects: algoliaProducts,
+    })
 
     // Configure index settings for better search
-    await index.setSettings({
-      searchableAttributes: [
-        'name',
-        'description',
-      ],
-      attributesForFaceting: [
-        'price',
-        'inventory_count',
-      ],
-      customRanking: [
-        'desc(inventory_count)',
-        'asc(price)',
-      ],
+    await algoliaClient.setSettings({
+      indexName: ALGOLIA_INDEX_NAME,
+      indexSettings: {
+        searchableAttributes: [
+          'name',
+          'description',
+        ],
+        attributesForFaceting: [
+          'price',
+          'inventory_count',
+        ],
+        customRanking: [
+          'desc(inventory_count)',
+          'asc(price)',
+        ],
+      },
     })
 
     console.log(`Successfully synced ${products.length} products to Algolia`)

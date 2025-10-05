@@ -33,11 +33,18 @@ export default function SearchBox() {
 
       setIsLoading(true)
       try {
-        const index = searchClient.initIndex(ALGOLIA_INDEX_NAME)
-        const { hits } = await index.search<SearchHit>(query, {
-          hitsPerPage: 5,
+        const { results } = await searchClient.search({
+          requests: [
+            {
+              indexName: ALGOLIA_INDEX_NAME,
+              query: query,
+              params: {
+                hitsPerPage: 5,
+              },
+            },
+          ],
         })
-        setResults(hits)
+        setResults((results[0].hits as SearchHit[]) || [])
       } catch (error) {
         console.error('Search error:', error)
         setResults([])

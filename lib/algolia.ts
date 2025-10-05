@@ -1,4 +1,4 @@
-import algoliasearch from 'algoliasearch'
+import { algoliasearch } from 'algoliasearch'
 
 if (!process.env.NEXT_PUBLIC_ALGOLIA_APP_ID) {
   throw new Error('NEXT_PUBLIC_ALGOLIA_APP_ID is not defined')
