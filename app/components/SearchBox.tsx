@@ -42,7 +42,13 @@ export default function SearchBox() {
             },
           ],
         })
-        setResults((results[0].hits as SearchHit[]) || [])
+
+        const firstResult = results[0]
+        if ('hits' in firstResult) {
+          setResults(firstResult.hits as SearchHit[])
+        } else {
+          setResults([])
+        }
       } catch (error) {
         console.error('Search error:', error)
         setResults([])
