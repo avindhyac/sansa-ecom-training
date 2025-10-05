@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import AuthButton from './AuthButton'
 import Link from 'next/link'
-import { ShoppingCart, Search, Sparkles } from 'lucide-react'
+import { ShoppingCart, Sparkles } from 'lucide-react'
+import SearchBox from './SearchBox'
 
 export default async function Header() {
   const supabase = await createClient()
@@ -26,14 +27,7 @@ export default async function Header() {
 
           {/* Search Bar - Hidden on mobile */}
           <div className="hidden md:flex items-center flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-subtle" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full bg-background-soft border border-border-subtle rounded-xl pl-12 pr-4 py-3 text-sm text-foreground placeholder:text-foreground-subtle focus:outline-none focus:border-jade focus:ring-2 focus:ring-jade/20 transition-all"
-              />
-            </div>
+            <SearchBox />
           </div>
 
           {/* Right Section */}
@@ -60,14 +54,7 @@ export default async function Header() {
 
         {/* Mobile Search - Shown on mobile */}
         <div className="md:hidden mt-3">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-subtle" />
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="w-full bg-background-soft border border-border-subtle rounded-xl pl-12 pr-4 py-3 text-sm text-foreground placeholder:text-foreground-subtle focus:outline-none focus:border-jade focus:ring-2 focus:ring-jade/20 transition-all"
-            />
-          </div>
+          <SearchBox />
         </div>
       </div>
     </header>
