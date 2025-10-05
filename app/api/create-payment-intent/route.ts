@@ -14,6 +14,33 @@ export async function POST(request: Request) {
       )
     }
 
+    // Ensure customer record exists before creating order
+    const { data: existingCustomer } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (!existingCustomer) {
+      console.log('Customer record missing for user:', user.id, '- Creating now')
+      const { error: customerError } = await supabase
+        .from('customers')
+        .insert({
+          id: user.id,
+          email: user.email!,
+          full_name: user.user_metadata.full_name || user.user_metadata.name || null,
+        })
+
+      if (customerError) {
+        console.error('Error creating customer:', customerError)
+        return NextResponse.json(
+          { error: 'Failed to create customer record' },
+          { status: 500 }
+        )
+      }
+      console.log('Customer record created successfully')
+    }
+
     const { cartItems } = await request.json()
 
     if (!cartItems || cartItems.length === 0) {
