@@ -38,9 +38,7 @@ export default function SearchBox() {
             {
               indexName: ALGOLIA_INDEX_NAME,
               query: query,
-              params: {
-                hitsPerPage: 5,
-              },
+              hitsPerPage: 5,
             },
           ],
         })
