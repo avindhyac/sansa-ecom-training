@@ -2,7 +2,8 @@
 
 import { Product } from '@/lib/types/database'
 import Image from 'next/image'
-import { ShoppingBag, Star } from 'lucide-react'
+import Link from 'next/link'
+import { ShoppingBag, Star, Eye } from 'lucide-react'
 import { useState } from 'react'
 
 interface ProductCardProps {
@@ -13,7 +14,9 @@ interface ProductCardProps {
 export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [isAdding, setIsAdding] = useState(false)
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     setIsAdding(true)
     onAddToCart(product)
 
@@ -22,7 +25,10 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   }
 
   return (
-    <div className="group relative bg-background-elevated rounded-2xl overflow-hidden border border-border-subtle hover:border-jade/50 transition-all duration-300 hover:shadow-2xl hover:shadow-jade/10 hover:-translate-y-1">
+    <Link
+      href={`/products/${product.id}`}
+      className="group relative bg-background-elevated rounded-2xl overflow-hidden border border-border-subtle hover:border-jade/50 transition-all duration-300 hover:shadow-2xl hover:shadow-jade/10 hover:-translate-y-1 block"
+    >
       {/* Image Container */}
       <div className="relative aspect-square bg-background-soft overflow-hidden">
         {product.image_url ? (
@@ -60,8 +66,14 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         )}
 
         {/* Quick View Button */}
-        <button className="absolute top-3 right-3 bg-background/80 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background">
-          <Star className="w-5 h-5 text-foreground" />
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+          className="absolute top-3 right-3 bg-background/80 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-background"
+        >
+          <Eye className="w-5 h-5 text-foreground" />
         </button>
       </div>
 
@@ -87,7 +99,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
             <button
               onClick={handleAddToCart}
               disabled={isAdding}
-              className="group/btn relative bg-jade hover:bg-jade-dark text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-jade/30 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
+              className="group/btn relative bg-jade hover:bg-jade-dark text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-jade/30 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden z-10"
             >
               <span className={`flex items-center gap-2 ${isAdding ? 'opacity-0' : 'opacity-100'} transition-opacity`}>
                 <ShoppingBag className="w-4 h-4" />
@@ -114,6 +126,6 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
       <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-jade/20 via-transparent to-accent-purple/20" />
       </div>
-    </div>
+    </Link>
   )
 }
