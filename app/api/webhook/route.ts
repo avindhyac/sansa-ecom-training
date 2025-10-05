@@ -40,6 +40,22 @@ export async function POST(request: Request) {
     case 'payment_intent.succeeded':
       const paymentIntent = event.data.object as Stripe.PaymentIntent
 
+      console.log('Payment intent succeeded:', paymentIntent.id)
+
+      // First, check if order exists
+      const { data: existingOrder } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('stripe_payment_intent_id', paymentIntent.id)
+        .maybeSingle()
+
+      if (!existingOrder) {
+        console.log('No order found with payment intent:', paymentIntent.id)
+        break
+      }
+
+      console.log('Found order:', existingOrder.id)
+
       // Update order status to completed
       const { data: order, error } = await supabase
         .from('orders')
@@ -60,14 +76,23 @@ export async function POST(request: Request) {
         break
       }
 
+      console.log('Order updated successfully:', order.id)
+
       // Send order confirmation email
       if (order && order.customers) {
         try {
+          console.log('Preparing to send order confirmation email for order:', order.id)
+          console.log('Customer email:', order.customers.email)
+          console.log('RESEND_API_KEY exists:', !!process.env.RESEND_API_KEY)
+          console.log('RESEND_FROM_EMAIL:', process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev')
+
           const orderItems = order.order_items.map((item: { products: { name: string }; quantity: number; price: number }) => ({
             name: item.products.name,
             quantity: item.quantity,
             price: item.price,
           }))
+
+          console.log('Order items:', orderItems)
 
           const emailHtml = await render(
             OrderConfirmationEmail({
@@ -84,17 +109,23 @@ export async function POST(request: Request) {
             })
           )
 
-          await resend.emails.send({
+          console.log('Email HTML rendered successfully')
+
+          const result = await resend.emails.send({
             from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
             to: order.customers.email,
             subject: `Order Confirmation - #${order.id}`,
             html: emailHtml,
           })
 
-          console.log('Order confirmation email sent to:', order.customers.email)
+          console.log('Order confirmation email sent successfully:', result)
+          console.log('Email sent to:', order.customers.email)
         } catch (emailError) {
           console.error('Error sending order confirmation email:', emailError)
+          console.error('Error details:', JSON.stringify(emailError, null, 2))
         }
+      } else {
+        console.log('Order or customer data missing:', { hasOrder: !!order, hasCustomers: !!order?.customers })
       }
       break
 
