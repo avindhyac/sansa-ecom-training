@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { resend } from '@/lib/resend'
+import { render } from '@react-email/components'
+import WelcomeEmail from '@/emails/WelcomeEmail'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -28,6 +31,27 @@ export async function GET(request: Request) {
             email: user.email!,
             full_name: user.user_metadata.full_name || user.user_metadata.name || null,
           })
+
+          // Send welcome email to new user
+          try {
+            const emailHtml = await render(
+              WelcomeEmail({
+                userName: user.user_metadata.full_name || user.user_metadata.name || 'there',
+                userEmail: user.email!,
+              })
+            )
+
+            await resend.emails.send({
+              from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+              to: user.email!,
+              subject: 'Welcome to Ecommerce Store! 🎉',
+              html: emailHtml,
+            })
+
+            console.log('Welcome email sent to:', user.email)
+          } catch (emailError) {
+            console.error('Error sending welcome email:', emailError)
+          }
         }
       }
 
