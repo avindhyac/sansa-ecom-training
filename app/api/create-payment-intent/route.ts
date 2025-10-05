@@ -42,6 +42,10 @@ export async function POST(request: Request) {
       },
     })
 
+    console.log('Creating order with payment intent:', paymentIntent.id)
+    console.log('User ID:', user.id)
+    console.log('Total amount:', amount / 100)
+
     // Create order in database
     const { data: order, error: orderError } = await supabase
       .from('orders')
@@ -56,11 +60,14 @@ export async function POST(request: Request) {
 
     if (orderError) {
       console.error('Error creating order:', orderError)
+      console.error('Full error details:', JSON.stringify(orderError, null, 2))
       return NextResponse.json(
-        { error: 'Failed to create order' },
+        { error: 'Failed to create order', details: orderError.message },
         { status: 500 }
       )
     }
+
+    console.log('Order created successfully:', order.id, 'with payment intent:', order.stripe_payment_intent_id)
 
     // Create order items
     const orderItems = cartItems.map((item: { product: { id: string; price: number }; quantity: number }) => ({
