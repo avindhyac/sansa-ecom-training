@@ -17,7 +17,6 @@ export default async function Home() {
     console.error('Error fetching products:', error)
   }
 
-  const featuredProducts = products?.slice(0, 3)
   const allProducts = products || []
 
   return (
@@ -41,7 +40,7 @@ export default async function Home() {
             <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
               Discover Products
               <br />
-              <span className="gradient-text">You'll Love</span>
+              <span className="gradient-text">You&apos;ll Love</span>
             </h1>
 
             <p className="text-lg md:text-xl text-foreground-muted max-w-2xl mx-auto mb-10">

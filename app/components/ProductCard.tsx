@@ -3,7 +3,7 @@
 import { Product } from '@/lib/types/database'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ShoppingBag, Star, Eye } from 'lucide-react'
+import { ShoppingBag, Eye } from 'lucide-react'
 import { useState } from 'react'
 
 interface ProductCardProps {
