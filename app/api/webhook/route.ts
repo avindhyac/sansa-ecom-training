@@ -33,7 +33,18 @@ export async function POST(request: Request) {
     )
   }
 
-  const supabase = await createClient()
+  // Use admin client for webhook (bypasses RLS)
+  const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+  const supabaseAdmin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  )
 
   // Handle the event
   switch (event.type) {
@@ -42,8 +53,8 @@ export async function POST(request: Request) {
 
       console.log('Payment intent succeeded:', paymentIntent.id)
 
-      // First, check if order exists
-      const { data: existingOrder } = await supabase
+      // First, check if order exists (using admin client to bypass RLS)
+      const { data: existingOrder } = await supabaseAdmin
         .from('orders')
         .select('id')
         .eq('stripe_payment_intent_id', paymentIntent.id)
@@ -56,8 +67,8 @@ export async function POST(request: Request) {
 
       console.log('Found order:', existingOrder.id)
 
-      // Update order status to completed
-      const { data: order, error } = await supabase
+      // Update order status to completed (using admin client to bypass RLS)
+      const { data: order, error } = await supabaseAdmin
         .from('orders')
         .update({ status: 'completed' })
         .eq('stripe_payment_intent_id', paymentIntent.id)
@@ -132,8 +143,8 @@ export async function POST(request: Request) {
     case 'payment_intent.payment_failed':
       const failedPaymentIntent = event.data.object as Stripe.PaymentIntent
 
-      // Update order status to cancelled
-      await supabase
+      // Update order status to cancelled (using admin client to bypass RLS)
+      await supabaseAdmin
         .from('orders')
         .update({ status: 'cancelled' })
         .eq('stripe_payment_intent_id', failedPaymentIntent.id)
