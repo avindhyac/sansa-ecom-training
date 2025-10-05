@@ -25,11 +25,16 @@ export async function GET(request: Request) {
           .eq('id', user.id)
           .single()
 
-        if (!existingCustomer) {
-          await supabase.from('customers').insert({
+        const isNewCustomer = !existingCustomer
+
+        if (isNewCustomer) {
+          // Create customer record using upsert to handle race conditions
+          await supabase.from('customers').upsert({
             id: user.id,
             email: user.email!,
             full_name: user.user_metadata.full_name || user.user_metadata.name || null,
+          }, {
+            onConflict: 'id'
           })
 
           // Send welcome email to new user
